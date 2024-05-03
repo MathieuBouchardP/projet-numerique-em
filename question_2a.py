@@ -87,30 +87,30 @@ def diffusion(ancien_pot):
                 if pot_fixe(r,z):
                     continue
 
-                R = ancien_pot[r, z] # rayon actuel
+                #R = ancien_pot[r, z] # rayon actuel
                 nouveau_pot[r,z] = (ancien_pot[r+1, z]+ancien_pot[r-1, z]+ancien_pot[r, z+1]+ancien_pot[r,z-1])/4\
-                    +pas*(ancien_pot[r+1, z]-ancien_pot[r-1, z])/8*R
+                    +pas*(ancien_pot[r+1, z]-ancien_pot[r-1, z])/(8*r*10)
                 
     return nouveau_pot
 
 
-interer = True
+rouler = True
 
 iterations = 0 
 
 epsilon = 0.001
-while run :
+while rouler :
     iterations += 1
     old = matrice_pot.copy()
     matrice_pot = diffusion(matrice_pot)
     diff = matrice_pot-old
     if np.linalg.norm(diff,ord=np.inf) < epsilon:
-        run = False
+        rouler = False
     #tmp_potentiel = new_potentiel
 
 print(f"Took {iterations} miam miam iterations")
 
-plt.imshow(matrice_pot, cmap='magma', origin='lower')
+plt.imshow(matrice_pot, cmap='inferno', origin='lower')
 plt.colorbar(label='Potentiel électrique (V)')
 plt.xlabel('r (mm)')
 plt.ylabel('z (mm)')

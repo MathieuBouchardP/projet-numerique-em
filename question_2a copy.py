@@ -14,10 +14,10 @@ hauteur_r = 3*mm
 
 pas = 0.1*mm
 
-dimension_en_z = longueur_z/pas
-dimension_en_r = hauteur_r/pas
+dimension_en_z = longueur_z/pas + 1 # Pour le 0
+dimension_en_r = hauteur_r/pas + 1 # Pour le 0
 
-matrice_pot = np.zeros((int(dimension_en_r), int(dimension_en_z))) # (30 x 120), (r x z)
+matrice_pot = np.zeros((int(dimension_en_r), int(dimension_en_z))) # (31 x 121), (r x z)
 
 
 """ Conditions frontières """
@@ -35,13 +35,13 @@ matrice_pot = np.zeros((int(dimension_en_r), int(dimension_en_z))) # (30 x 120),
 
 # Mur en angle: potentiel = -300 V. 
     # L'angle est tel que la ligne tracé par le mur a une pente de 1
-for i in range(30):
+for i in range(31):
     matrice_pot[(i,i)] = -300
 
 
 # Mur du haut, r=30: -300V
-for i in range(29,119): # Indice pour les dimension de z = [3 ; 12[ mm
-    matrice_pot[(29,i)] = -300
+for i in range(30,120): # Indice pour les dimension de z = [3 ; 12[ mm
+    matrice_pot[(30,i)] = -300
 
 # Initialisation d'une copie de la matrice pour toujours avoir accès à une matrice qui représente t=0
 Potentiel_initial = matrice_pot.copy()
@@ -59,35 +59,32 @@ def pot_fixe(r,z):
     Entré: Point de la matrice (r, z)
     Sortie: Bool
     """
-    bool_electrode = r == 0 and z>=44
-    bool_mur_droit = r<=29 and z == 119
-    bool_mur_angle = r>= z and z<= 29
-    bool_mur_haut = r == 29 and z>= 29
+    bool_electrode = r == 0 and z>=45
+    bool_mur_droit = r<=30 and z == 120
+    bool_mur_angle = r>= z and z<= 30
+    bool_mur_haut = r == 30 and z>= 30
 
     return bool_electrode or bool_mur_droit or bool_mur_angle or bool_mur_haut
 
-w = 0.3
+
 def diffusion(ancien_pot):
     #nouveau_pot = Potentiel_initial.copy() # On reprend la matrice qui a les conditions initiales
-    #pot_boosté = Potentiel_initial.copy()
     nouveau_pot = ancien_pot
-
     for r in range(29,-1, -1):  # On itère sur le rayon mais du plafond vers le centre (pour que ça aille plus vite)
         if r == 0:
-            for z in range(0,45):  # On mets à jour le potentiel pour chaque ligne
+            for z in range(0,46):  # On mets à jour le potentiel pour chaque ligne
             #for z in range(1,44): # On mets à jour le potentiel pour la ligne à r=0
                 nouveau_pot[r, z] = (4*ancien_pot[1,z]+ancien_pot[0,z+1]+ancien_pot[0,z-1])/6
-                #pot_boosté = ancien_pot[r, z]+(1+w)*(nouveau_pot[r,z]-ancien_pot[r, z])
 
         else:
-            for z in range(0,119):  # On mets à jour le potentiel pour chaque ligne
-                if pot_fixe(r,z):
-                    continue
+            for z in range(119, -1, -1):  # On mets à jour le potentiel pour chaque ligne
+                if ancien_pot[r, z] == -300:
+                    break
+                #if pot_fixe(r,z):
+                   # continue
 
-                #R = ancien_pot[r, z] # rayon actuel
                 nouveau_pot[r,z] = (ancien_pot[r+1, z]+ancien_pot[r-1, z]+ancien_pot[r, z+1]+ancien_pot[r,z-1])/4\
                     +(pas/(8*r*10))*(ancien_pot[r+1, z]-ancien_pot[r-1, z])
-                #pot_boosté = ancien_pot[r, z]+(1+w)*(nouveau_pot[r,z]-ancien_pot[r, z])
                 
     return nouveau_pot
 
@@ -101,9 +98,11 @@ while rouler :
     iterations += 1
     old = matrice_pot.copy()
     matrice_pot = diffusion(matrice_pot)
+    diff = np.abs(np.mean(matrice_pot)) - np.abs(np.mean(old))
     #diff = matrice_pot-old
     #if np.linalg.norm(diff,ord=np.inf) < epsilon:
-    if iterations > 2400:
+    if diff < epsilon:
+    #if iterations == 1:
         rouler = False
     #tmp_potentiel = new_potentiel
 

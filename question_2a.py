@@ -73,7 +73,7 @@ def diffusion(potentiel):
                 potentiel[r, z] = (4*potentiel[1,z]+potentiel[0,z+1]+potentiel[0,z-1])/6
 
         else:
-            for z in range(119, -1, -1):  
+            for z in range(119, 0, -1):  
                 # On itère sur Z du fond ver l'avant en excluant le fond et ce qui se situe par dessus le mur en angle et 
                 if potentiel[r, z] == -300:
                     # Fait en sorte qu'on itère par pour les indices qui dépasse le mur en angle
@@ -95,11 +95,11 @@ while rouler :
     iterations += 1
     old = matrice_pot.copy()
     matrice_pot = diffusion(matrice_pot)
-    diff = np.abs(np.mean(matrice_pot)) - np.abs(np.mean(old))  #Autre moyen de faire la diff
+    #diff = np.abs(np.mean(matrice_pot)) - np.abs(np.mean(old))  #Autre moyen de faire la diff
     #diff = matrice_pot-old
     #if np.linalg.norm(diff,ord=np.inf) < epsilon:
-    if diff < epsilon: #lié à l'autre moyen de vérifier la dif
-    #if iterations == 1:
+    #if diff < epsilon: #lié à l'autre moyen de vérifier la dif
+    if iterations == 10:
         rouler = False
 
 end_time = time.time()
@@ -110,14 +110,18 @@ print(f"Le temps d'exécution est {execution_time} secondes.")
 
 print(f"Took {iterations} miam miam iterations")
 
-plt.imshow(matrice_pot, cmap='magma', origin='lower', extent=[0, 12*mm, -3*mm, 3*mm])
-plt.imshow(matrice_pot, cmap='inferno', origin='lower')
+matrice_pot_inv = np.flip(matrice_pot, axis=0)
+
+V_total = np.concatenate((matrice_pot_inv, matrice_pot[1:,:]), axis=0)
+
+plt.imshow(V_total, cmap='turbo', origin='lower', extent=[0, 12, -3, 3])
+#plt.imshow(matrice_pot, cmap='inferno', origin='lower')
 plt.colorbar(label='Potentiel électrique (V)')
-plt.xlabel('z (mm)')
-plt.ylabel('r (mm)')
+plt.xlabel('Z [mm]')
+plt.ylabel('Rayon [mm]')
 plt.title('Potentiel dans la chambre à ionisation')
 plt.show()
 
-V_miroir = np.flip(matrice_pot, axis=0)
+
 
 #test

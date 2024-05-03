@@ -59,7 +59,7 @@ Le potentiel est fixe au endroits suivants:
 #########################################################################################
 
 """ Définition de fonctions """
-
+w = 0.878
 def diffusion(potentiel):
     """
     Entré: np array, Grille de potentiel
@@ -70,7 +70,7 @@ def diffusion(potentiel):
         if r == 0:
             for z in range(1,46):  
                 # On itère sur Z jusqu'au début de l'électrode (soit z=46 ou Z < 45mm)
-                potentiel[r, z] = (4*potentiel[1,z]+potentiel[0,z+1]+potentiel[0,z-1])/6
+                potentiel[r, z] = (1+w)*(4*potentiel[1,z]+potentiel[0,z+1]+potentiel[0,z-1])/6 - w*potentiel[r, z]
 
         else:
             for z in range(119, -1, -1):  
@@ -80,11 +80,10 @@ def diffusion(potentiel):
                     break
 
                 R = r*10 # rayon actuel
-                potentiel[r,z] = (potentiel[r+1, z]+potentiel[r-1, z]+potentiel[r, z+1]+potentiel[r,z-1])/4\
-                    +(pas/(8*R))*(potentiel[r+1, z]-potentiel[r-1, z])
+                potentiel[r,z] = (1+w)*((potentiel[r+1, z]+potentiel[r-1, z]+potentiel[r, z+1]+potentiel[r,z-1])/4\
+                    +(pas/(8*R))*(potentiel[r+1, z]-potentiel[r-1, z])) - w*potentiel[r, z]
                 
     return potentiel
-
 
 
 rouler = True           # Servira à arrêter les itérations

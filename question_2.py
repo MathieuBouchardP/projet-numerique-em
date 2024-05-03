@@ -1,4 +1,4 @@
-""" Relaxation, méthode de Jacobi, 
+""" Relaxation, 
 notation:
     - R correspond à une mesure du rayon
     - Z correspond à une mesure sur l'axe Z
@@ -122,8 +122,8 @@ plt.ylabel('Rayon [mm]')
 plt.title('Potentiel dans la chambre à ionisation')
 
 # Ajouter le nombre d'itération et le délais d'exécution sur le graphique
-plt.text(0, -4.5, f"Nombre d'itération: {iterations}", color='black')
-plt.text(0, -5.1, f"Temps d'exécusion: {round(temps_exécution, 2)} [s]", color='black')
+plt.text(0, -4.5, f"Nombre d'itérations: {iterations}", color='black')
+plt.text(0, -5.1, f"Temps d'exécution: {round(temps_exécution, 2)} [s]", color='black')
 
 
 plt.show()

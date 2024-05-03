@@ -1,4 +1,4 @@
-""" Docstring, 
+""" Méthode de Jacobi, 
 notation:
     - R correspond à une mesure du rayon
     - Z correspond à une mesure sur l'axe Z
@@ -30,11 +30,11 @@ matrice_pot = np.zeros((int(dimension_en_r), int(dimension_en_z))) # (31 x 121),
 
 """ Conditions frontières """
 
-# L'électrode central (r=0) longue de 7,5 mm est maintenue à 0V
+# L'électrode central (R=0) longue de 7,5 mm est maintenue à 0V
     # Puisque la matrice que nous avons créé contient déjà des zéro, nous n'avons pas besoin de changer quoi que ce soit
 ##########################################
 
-# Mur de droite, z = 12: potentiel = 0V
+# Mur de droite, Z = 12: potentiel = 0V
     # Puisque la matrice que nous avons créé contient déjà des zéro, nous n'avons pas besoin de changer quoi que ce soit
 #########################################
 
@@ -53,10 +53,13 @@ for i in range(30,120): # Indice pour les dimension de z = [3 ; 12[ mm
 Le potentiel est fixe au endroits suivants: 
     - L'électrode, R = 0, Z = [4.5;120[ mm : 0V      => Fixe pour indices: r == 0 and z>=45
     - Mur droit, R = [0;3], Z = 12 mm      : 0V      => Fixe pour indices: r<=30 and z == 120
-    - Mur en angle, R = Z = [0;3]  mm      : -300V   => Fixe pour indices: r>= z and z<= 30
+    - Mur en angle, R >= Z = [0;3]  mm      : -300V  => Fixe pour indices: r>= z and z<= 30
     - Mur haut, R = 30, Z = [3;12[ mm      : -300V   => Fixe pour indices: r == 30 and z>= 30
 """
 #########################################################################################
+
+# On crée une copie de la matrice original pour toujours y avoir accès 
+matrice_initiale = matrice_pot.copy()
 
 """ Définition de fonctions """
 
@@ -64,33 +67,33 @@ def diffusion(potentiel):
     """
     Entré: np array, Grille de potentiel
     Sortie: np array, Grille de potentiel après diffusion """
-    
-    for r in range(29,-1, -1):  
+    nouveau_pot = matrice_initiale.copy()
+    for r in range(29,-1, -1):
         # On itère sur le rayon à partir du plafond vers le centre (excluant r=30, soit R=3mm, puisque le potentiel y est fixe)
         if r == 0:
             for z in range(1,46):  
                 # On itère sur Z jusqu'au début de l'électrode (soit z=46 ou Z < 45mm)
-                potentiel[r, z] = (4*potentiel[1,z]+potentiel[0,z+1]+potentiel[0,z-1])/6
+                nouveau_pot[r, z] = (4*potentiel[1,z]+potentiel[0,z+1]+potentiel[0,z-1])/6
 
         else:
             for z in range(119, -1, -1):  
                 # On itère sur Z du fond ver l'avant en excluant le fond et ce qui se situe par dessus le mur en angle et 
-                if potentiel[r, z] == -300:
+                if nouveau_pot[r, z] == -300:
                     # Fait en sorte qu'on itère par pour les indices qui dépasse le mur en angle
                     break
 
                 R = r*10 # rayon actuel
-                potentiel[r,z] = (potentiel[r+1, z]+potentiel[r-1, z]+potentiel[r, z+1]+potentiel[r,z-1])/4\
+                nouveau_pot[r,z] = (potentiel[r+1, z]+potentiel[r-1, z]+potentiel[r, z+1]+potentiel[r,z-1])/4\
                     +(pas/(8*R))*(potentiel[r+1, z]-potentiel[r-1, z])
                 
-    return potentiel
+    return nouveau_pot
 
 
 
 rouler = True           # Servira à arrêter les itérations
 iterations = 0          # Compteur d'itérations
 arrêt = 1e-9            # Lorsque chaque itération ne différerons entre elles que de ce facteurs, on arrête
-max_interation = 10000   # Nombre max d'itérations pour éviter que ça roule à l'infinie si ça converge pas.
+max_interation = 20000  # Nombre max d'itérations pour éviter que ça roule à l'infinie si ça converge pas.
 
 
 while rouler :

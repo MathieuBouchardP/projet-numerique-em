@@ -89,7 +89,7 @@ def diffusion(potentiel):
 rouler = True           # Servira à arrêter les itérations
 iterations = 0          # Compteur d'itérations
 arrêt = 1e-9            # Lorsque chaque itération ne différerons entre elles que de ce facteurs, on arrête
-max_interation = 10000   # Nombre max d'itérations pour éviter que ça roule à l'infinie si ça converge pas.
+max_interation = 20000   # Nombre max d'itérations pour éviter que ça roule à l'infinie si ça converge pas.
 
 
 while rouler :

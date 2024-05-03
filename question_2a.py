@@ -57,10 +57,10 @@ def pot_fixe(r,z):
     """
     bool_electrode = r == 0 and z>=44
     bool_mur_droit = r<=29 and z == 119
-    bool_mur_angle = r == z and r<= 29
+    bool_mur_angle = r>= z and z<= 29
     bool_mur_haut = r == 29 and z>= 29
 
-    return bool_electrode and bool_mur_droit and bool_mur_angle and bool_mur_haut
+    return bool_electrode or bool_mur_droit or bool_mur_angle or bool_mur_haut
 
 def maj_r_pas_0(V_avant_r, V_arrière_r, V_avant_z, V_arrière_z, R):
     """
@@ -74,27 +74,43 @@ def maj_r_pas_0(V_avant_r, V_arrière_r, V_avant_z, V_arrière_z, R):
 def diffusion(ancien_pot):
     nouveau_pot = Potentiel_initial.copy() # On reprend la matrice qui a les conditions initiales
 
-    for r in range(0,119, -1):  # On itère sur le rayon mais du plafond vers le centre (pour que ça aille plus vite)
+    for r in range(29,-1, -1):  # On itère sur le rayon mais du plafond vers le centre (pour que ça aille plus vite)
         if r == 0:
-            for z in range(1,44,-1): # On mets à jour le potentiel pour la ligne à r=0 mais en partant de l'électrode vers le bord
+            for z in range(0,119):  # On mets à jour le potentiel pour chaque ligne
+                if pot_fixe(r,z):
+                    continue
+            #for z in range(1,44): # On mets à jour le potentiel pour la ligne à r=0
                 nouveau_pot[r, z] = (4*ancien_pot[1,z]+ancien_pot[0,z+1]+ancien_pot[0,z-1])/6
 
         else:
             for z in range(0,119):  # On mets à jour le potentiel pour chaque ligne
                 if pot_fixe(r,z):
-                    next
+                    continue
+
                 R = ancien_pot[r, z] # rayon actuel
-                nouveau_pot[r,z] = (ancien_pot[r+1, z]+ancien_pot(r-1, z)+ancien_pot[r, z+1]+ancien_pot[r,z-1])/4\
+                nouveau_pot[r,z] = (ancien_pot[r+1, z]+ancien_pot[r-1, z]+ancien_pot[r, z+1]+ancien_pot[r,z-1])/4\
                     +pas*(ancien_pot[r+1, z]-ancien_pot[r-1, z])/8*R
                 
     return nouveau_pot
-oui = True
-iterations = 0
-while oui:
-    iterations += 1
 
-matrice_pot_2 = diffusion(matrice_pot)
-plt.imshow(matrice_pot_2, cmap='gist_ncar', origin='lower')
+
+interer = True
+
+iterations = 0 
+
+epsilon = 0.001
+while run :
+    iterations += 1
+    old = matrice_pot.copy()
+    matrice_pot = diffusion(matrice_pot)
+    diff = matrice_pot-old
+    if np.linalg.norm(diff,ord=np.inf) < epsilon:
+        run = False
+    #tmp_potentiel = new_potentiel
+
+print(f"Took {iterations} miam miam iterations")
+
+plt.imshow(matrice_pot, cmap='magma', origin='lower')
 plt.colorbar(label='Potentiel électrique (V)')
 plt.xlabel('r (mm)')
 plt.ylabel('z (mm)')

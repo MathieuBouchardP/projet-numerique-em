@@ -181,6 +181,15 @@ CF = np.array([0, 0, 0, 0, 0, 0, 0, 0, -300, 0, 0, 0, 0, 0, 0, 0, -300, 0, 0, -3
 
 V = np.linalg.solve(inverseP, CF)
 print(V)
+V_image = []
+v_temp = []
+for i in V:
+    if len(v_temp)%9 == 0:
+        V_image.append(v_temp)
+        v_temp = []
+    v_temp.append(i)
+
+
 V_image = np.array([[0, 0, 0, 0, 0, 0, 1.33333333, -250, -300], 
   [-300, -187.5, -112.5, -112.5, -112.5, -112.5, -187.5, -300, 0 ], 
   [-300, -300, -300, -300, -300, -300, -300, 0, 0]])

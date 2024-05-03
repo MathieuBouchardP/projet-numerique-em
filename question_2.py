@@ -1,4 +1,4 @@
-""" Sur-Relaxation et Gauss-Seidel, 
+""" Relaxation, méthode de Jacobi, 
 notation:
     - R correspond à une mesure du rayon
     - Z correspond à une mesure sur l'axe Z
@@ -54,31 +54,33 @@ matrice_initiale = matrice_pot.copy()
 
 
 """ Définition de fonctions """
-w = 0.878
+
 def diffusion(potentiel):
     """
     Entré: np array, Grille de potentiel
     Sortie: np array, Grille de potentiel après diffusion """
     
-    for r in range(29,-1, -1):  
-        # On itère sur le rayon à partir du plafond vers le centre (excluant r=30, soit R=3mm, puisque le potentiel y est fixe)
+    nouveau_pot = matrice_initiale.copy() #On définie une nouvelle grille de potentiel ayany les C.F.
+
+    for r in range(29,-1, -1): # On itère sur le rayon à partir du plafond vers le centre (excluant r=30, soit R=3mm, puisque le potentiel y est fixe)
+        
         if r == 0:
-            for z in range(1,46):  
-                # On itère sur Z jusqu'au début de l'électrode (soit z=46 ou Z < 45mm)
-                potentiel[r, z] = (1+w)*(4*potentiel[1,z]+potentiel[0,z+1]+potentiel[0,z-1])/6 - w*potentiel[r, z]
+            for z in range(1,46):  # On itère sur Z jusqu'au début de l'électrode (soit z=46 ou Z < 45mm)
+                
+                nouveau_pot[r, z] = (4*potentiel[1,z]+potentiel[0,z+1]+potentiel[0,z-1])/6
 
         else:
-            for z in range(119, -1, -1):  
-                # On itère sur Z du fond ver l'avant en excluant le fond et ce qui se situe par dessus le mur en angle et 
-                if potentiel[r, z] == -300:
-                    # Fait en sorte qu'on itère par pour les indices qui dépasse le mur en angle
+            for z in range(119, -1, -1): # On itère sur Z du fond ver l'avant en excluant le fond et ce qui se situe par dessus le mur en angle et 
+                
+                if nouveau_pot[r, z] == -300: # Fait en sorte qu'on itère par pour les indices qui dépasse le mur en angle
                     break
 
-                R = r*10 # rayon actuel
-                potentiel[r,z] = (1+w)*((potentiel[r+1, z]+potentiel[r-1, z]+potentiel[r, z+1]+potentiel[r,z-1])/4\
-                    +(pas/(8*R))*(potentiel[r+1, z]-potentiel[r-1, z])) - w*potentiel[r, z]
+                R = r*10 # rayon du point actuel
+                nouveau_pot[r,z] = (potentiel[r+1, z]+potentiel[r-1, z]+potentiel[r, z+1]+potentiel[r,z-1])/4\
+                    +(pas/(8*R))*(potentiel[r+1, z]-potentiel[r-1, z])
                 
-    return potentiel
+    return nouveau_pot
+
 
 
 rouler = True           # Servira à arrêter les itérations
@@ -117,7 +119,7 @@ plt.imshow(Potentiel_plan_r_z, cmap='turbo', extent=[0, 12, -3, 3])
 plt.colorbar(label='Potentiel électrique [V]')
 plt.xlabel('Z [mm]')
 plt.ylabel('Rayon [mm]')
-plt.title("Potentiel de la chambre d'ionisation")
+plt.title('Potentiel dans la chambre à ionisation')
 
 # Ajouter le nombre d'itération et le délais d'exécution sur le graphique
 plt.text(0, -4.5, f"Nombre d'itération: {iterations}", color='black')

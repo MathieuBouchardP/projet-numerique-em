@@ -117,7 +117,7 @@ plt.imshow(Potentiel_plan_r_z, cmap='turbo', extent=[0, 12, -3, 3])
 plt.colorbar(label='Potentiel électrique [V]')
 plt.xlabel('Z [mm]')
 plt.ylabel('Rayon [mm]')
-plt.title("Potentiel de la chambre d'ionisation")
+#plt.title("Potentiel de la chambre d'ionisation")
 
 # Ajouter le nombre d'itération et le délais d'exécution sur le graphique
 plt.text(0, -4.5, f"Nombre d'itérations: {iterations}", color='black')
